@@ -22,8 +22,19 @@
 
 ## 🧭 Why
 
-<!-- To write: Mira's pitch in two or three sentences (for whom, what problem, what changes). -->
-_Coming soon._
+For a wheelchair user, one broken elevator can make a trip impossible.
+And you usually find out at the station, when it's too late to change plans.
+
+Wheelmap and Île-de-France Mobilités tell you whether a route is accessible
+**today**. Mira estimates whether it will **still be tomorrow morning**, and
+suggests another route when the risk is high.
+
+| 1. Filter | 2. Forecast | 3. Recommend |
+|---|---|---|
+| Routes through a place OpenStreetMap marks as not accessible are dropped | Elevator outage risk for each remaining route, with a low / median / high range | Options ranked and explained in plain language. You decide. |
+
+> Mira shows a risk level, never a guarantee. A place with no data in
+> OpenStreetMap shows as "not verified", never "accessible".
 
 ## ⚡ Get started
 
