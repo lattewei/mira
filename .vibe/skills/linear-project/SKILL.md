@@ -12,7 +12,7 @@ This skill uses the Linear MCP. If its tools (`save_project`, `save_milestone`â€
 ## Fixed values
 
 - Team: `MIRA`
-- Project template: `Feature`. It creates a milestone named `M1 â€” rename me`.
+- Project template: `Feature`. It creates a milestone named `M1: rename me`.
 
 ## Steps
 
@@ -22,7 +22,7 @@ This skill uses the Linear MCP. If its tools (`save_project`, `save_milestone`â€
 4. **Show the full draft**: project name, description, then every milestone with its description. Wait for an explicit "ok". No "ok", nothing gets created.
 5. **Create**, in this order:
    1. `save_project` with `name`, `addTeams: ["MIRA"]`, `template: "Feature"` and `description` = the written description. The description **replaces** the template body, so it must contain every section.
-   2. `save_milestone` with `project` = the new project and `id` = the `M1 â€” rename me` milestone returned by the previous step: rename it (`name`) and fill its `description`.
+   2. `save_milestone` with `project` = the new project and `id` = the `M1: rename me` milestone returned by the previous step: rename it (`name`) and fill its `description`.
    3. `save_milestone` (no `id`) for each following milestone, with `project`, `name` and `description`.
 6. **Reply** with the project URL and the list of milestones created. Then offer `linear-issues` to split the first milestone.
 
@@ -58,5 +58,5 @@ This skill uses the Linear MCP. If its tools (`save_project`, `save_milestone`â€
 ## Style
 
 - English, short sentences, the same word for the same thing from start to finish.
-- Short, meaningful milestone names ("M1 â€” ClickHouse connection", not "Phase 1").
+- Short, meaningful milestone names ("M1: ClickHouse connection", not "Phase 1").
 - A section with no content keeps its heading and an empty bullet: don't delete it.
