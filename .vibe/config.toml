@@ -1,0 +1,7 @@
+[[mcp_servers]]
+name = "linear"
+transport = "streamable-http"
+url = "https://mcp.linear.app/mcp"
+
+[mcp_servers.auth]
+type = "oauth"
