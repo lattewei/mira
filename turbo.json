@@ -1,0 +1,40 @@
+{
+	"$schema": "https://turbo.build/schema.json",
+	"ui": "tui",
+	"tasks": {
+		"build": {
+			"dependsOn": ["^build"],
+			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"outputs": ["dist/**"]
+		},
+		"lint": {
+			"dependsOn": ["^lint"]
+		},
+		"check-types": {
+			"dependsOn": ["^check-types"]
+		},
+		"dev": {
+			"cache": false,
+			"persistent": true
+		},
+		"start": {
+			"dependsOn": ["build"],
+			"cache": false,
+			"persistent": true,
+			"passThroughEnv": ["*"]
+		},
+		"deploy": {
+			"dependsOn": ["build"],
+			"cache": false
+		}
+	},
+	"globalEnv": [
+		"CI",
+		"CORS_ORIGIN",
+		"MISTRAL_API_KEY",
+		"NODE_ENV",
+		"VITE_SERVER_URL",
+		"_VARLOCK_ENV_KEY"
+	],
+	"globalDependencies": [".env*", "apps/*/.env*", "packages/*/.env*"]
+}

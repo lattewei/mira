@@ -1,40 +1,75 @@
 # Local docs (designs, plans)
 /docs/
 
-# Secrets
-.env
-.env.*
-!.env.example
-*.pem
-*.key
-
 # Dependencies
-node_modules/
+node_modules
+.pnp
+.pnp.js
 .venv/
 venv/
 __pycache__/
 
-# Builds and caches
-dist/
-build/
-.next/
-.turbo/
-.cache/
-coverage/
+# Build outputs
+dist
+build
+dev-dist
+.next
 *.tsbuildinfo
 
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
+# Generated files
+apps/web/src/routeTree.gen.ts
+local.db
+local.db-*
+
+# Environment variables and secrets
+# Varlock schemas (.env.schema) are committed, values are not.
+.env
+.env.*
+!.env.example
+!.env.schema
+*.pem
+*.key
+
+# IDEs and editors
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea
+*.swp
+*.swo
+*~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Editors
-.idea/
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
+# Logs
+logs
+.evlog/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Turbo
+.turbo
+.nx
+
+# Cloudflare / deploy tools
+.wrangler
+.alchemy
+.vercel
+
+# Testing
+coverage
+.nyc_output
+
+# Misc
+*.tgz
+.cache
+tmp
+temp

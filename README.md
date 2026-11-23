@@ -1,45 +1,61 @@
 <p align="center">
-  <img alt="mira. Every journey deserves a way." src=".github/assets/banner.jpg" width="100%">
+  <img src=".github/assets/banner.png" alt="Mira — Every journey deserves a way." width="100%">
 </p>
 
 <h1 align="center">Mira</h1>
 
 <p align="center">
-  <strong>Every journey deserves a way.</strong><br />
-  The Mira monorepo: the front, the back, and how we work.
+  <strong>Mobility Intelligence & Route Anticipation</strong><br>
+  <em>Predictive mobility for a more accessible world.</em>
 </p>
 
 <p align="center">
-  <img alt="Status: under construction" src="https://img.shields.io/badge/status-under%20construction-e8893a?labelColor=1f2a5a">
-  <img alt="Data on ClickHouse" src="https://img.shields.io/badge/data-ClickHouse-e8893a?logo=clickhouse&logoColor=white&labelColor=1f2a5a">
+  <img alt="Status" src="https://img.shields.io/badge/status-in%20development-e8893a?style=flat-square&labelColor=1f2a5a">
+  <img alt="Mistral AI" src="https://img.shields.io/badge/AI-Mistral-e8893a?style=flat-square&logo=mistralai&logoColor=white&labelColor=1f2a5a">
+  <img alt="ClickHouse" src="https://img.shields.io/badge/data-ClickHouse-e8893a?style=flat-square&logo=clickhouse&logoColor=white&labelColor=1f2a5a">
+  <img alt="Langfuse" src="https://img.shields.io/badge/observability-Langfuse-e8893a?style=flat-square&labelColor=1f2a5a">
 </p>
 
-<p align="center">
-  <a href="#-get-started"><strong>Get started »</strong></a>
+---
+
+> Built for [**Ahead of Time — Mistral × ClickHouse**](https://luma.com/clickh-mistral-hack-paris) — December 5, 2026, Paris.
+
+<p align="start">
+  <a href="https://luma.com/clickh-mistral-hack-paris">
+    <img src="https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=2,background=white,quality=75,width=400,height=400/uploads/sk/106db1ea-f0c0-4691-a4b3-03d8c03f0c58.jpg" alt="Mistral × ClickHouse Hackathon" width="280">
+  </a>
 </p>
 
-<br />
+## About
 
-## 🧭 Why
+For a wheelchair user, one broken elevator can make an entire journey impossible.
 
-For a wheelchair user, one broken elevator can make a trip impossible.
-And you usually find out at the station, when it's too late to change plans.
+Mira is a predictive mobility companion designed to anticipate accessibility disruptions, recommend alternative routes, and proactively monitor journeys.
 
-Wheelmap and Île-de-France Mobilités tell you whether a route is accessible
-**today**. Mira estimates whether it will **still be tomorrow morning**, and
-suggests another route when the risk is high.
+Starting in Paris, designed for a more accessible world.
 
-| 1. Filter | 2. Forecast | 3. Recommend |
-|---|---|---|
-| Routes through a place OpenStreetMap marks as not accessible are dropped | Elevator outage risk for each remaining route, with a low / median / high range | Options ranked and explained in plain language. You decide. |
+## How it works
 
-> Mira shows a risk level, never a guarantee. A place with no data in
-> OpenStreetMap shows as "not verified", never "accessible".
+→ **Forecast** — Estimate accessibility disruptions before departure.  
+→ **Recommend** — Find routes tailored to individual mobility needs.  
+→ **Monitor** — Proactively notify travelers when conditions change.
 
-## ⚡ Get started
+> Predictions communicate risk, not guarantees. Missing accessibility data is treated as unverified.
+
+## Powered by
+
+| Technology | Purpose |
+|---|---|
+| [Timestral](https://github.com/mistralai/timestral) | Predictive intelligence |
+| [Mistral Large 4](https://mistral.ai) | Reasoning & recommendations |
+| [ClickHouse](https://clickhouse.com) | Data & analytics |
+| [Langfuse](https://langfuse.com) | Observability & evaluation |
+
+## Getting started
 
 ```bash
-git clone https://github.com/mira-ahead/mira && cd mira
+git clone https://github.com/mira-ahead/mira
+cd mira
 ```
 
 ### Connect the Linear MCP

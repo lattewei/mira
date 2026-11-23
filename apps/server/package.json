@@ -1,0 +1,28 @@
+{
+	"name": "server",
+	"type": "module",
+	"main": "src/index.ts",
+	"scripts": {
+		"dev": "varlock-wrangler dev",
+		"build": "wrangler deploy --dry-run --outdir dist",
+		"check-types": "tsc --noEmit",
+		"deploy": "varlock-wrangler deploy",
+		"cf-typegen": "varlock-wrangler types",
+		"env:generate": "varlock codegen"
+	},
+	"dependencies": {
+		"@ai-sdk/mistral": "^4.0.89",
+		"@varlock/cloudflare-integration": "^1.6.4",
+		"ai": "catalog:",
+		"hono": "^4.13.18",
+		"varlock": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "catalog:",
+		"@mira/config": "workspace:*",
+		"@types/node": "catalog:",
+		"typescript": "catalog:",
+		"wrangler": "4.166.0"
+	}
+}

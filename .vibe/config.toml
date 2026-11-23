@@ -5,3 +5,20 @@ url = "https://mcp.linear.app/mcp"
 
 [mcp_servers.auth]
 type = "oauth"
+
+[[mcp_servers]]
+name = "cloudflare_docs"
+transport = "streamable-http"
+url = "https://docs.mcp.cloudflare.com/mcp"
+
+[[mcp_servers]]
+name = "context7"
+transport = "stdio"
+command = "npx"
+args = ["-y", "@upstash/context7-mcp"]
+
+[[mcp_servers]]
+name = "better_t_stack"
+transport = "stdio"
+command = "pnpm"
+args = ["dlx", "create-better-t-stack@latest", "mcp"]

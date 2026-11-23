@@ -1,0 +1,41 @@
+{
+	"name": "mira",
+	"private": true,
+	"workspaces": [
+		"apps/*",
+		"packages/*"
+	],
+	"type": "module",
+	"scripts": {
+		"dev": "turbo run dev",
+		"build": "turbo run build",
+		"check-types": "turbo run check-types",
+		"dev:web": "turbo run dev -F web --",
+		"dev:server": "turbo run dev -F server --",
+		"env:generate": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/",
+		"postinstall": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/",
+		"check": "biome check --write .",
+		"prepare": "husky",
+		"deploy": "turbo run deploy"
+	},
+	"dependencies": {
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.6.7",
+		"@cloudflare/workers-types": "catalog:",
+		"@mira/config": "workspace:*",
+		"@types/node": "catalog:",
+		"husky": "^9.1.7",
+		"lint-staged": "^17.6.0",
+		"turbo": "^2.11.11",
+		"typescript": "catalog:",
+		"varlock": "catalog:"
+	},
+	"lint-staged": {
+		"*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc,css}": [
+			"biome check --write --no-errors-on-unmatched"
+		]
+	},
+	"packageManager": "pnpm@12.21.0"
+}
