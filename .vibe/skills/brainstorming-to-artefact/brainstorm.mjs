@@ -3,12 +3,8 @@ import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const args = process.argv.slice(2);
-const skipShots = args.includes("--no-shots");
-const dir = path.resolve(args.find((a) => !a.startsWith("--")) || ".");
-const data = JSON.parse(fs.readFileSync(path.join(dir, "data.json"), "utf8"));
-const shots = (data.proposal && data.proposal.shots) || [];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function findChrome() {
@@ -92,15 +88,15 @@ async function launch(chromePath) {
 	return { send, once, close };
 }
 
-async function capture() {
+export async function captureShots(shots, outDir) {
 	const todo = shots.filter((s) => s.url);
 	if (!todo.length) return 0;
 	const chromePath = findChrome();
 	if (!chromePath) {
-		console.error("Chrome not found. Set CHROME_PATH, or run with --no-shots.");
+		console.error("Chrome not found. Set CHROME_PATH, or skip the shots.");
 		return 1;
 	}
-	fs.mkdirSync(path.join(dir, "shots"), { recursive: true });
+	fs.mkdirSync(outDir, { recursive: true });
 	const cdp = await launch(chromePath);
 	await cdp.send("Page.enable");
 	let failed = 0;
@@ -138,7 +134,7 @@ async function capture() {
 				format: "png",
 			});
 			fs.writeFileSync(
-				path.join(dir, "shots", `${s.name}.png`),
+				path.join(outDir, `${s.name}.png`),
 				Buffer.from(png, "base64"),
 			);
 			console.log(`shot ok    ${s.name}  ${width}x${height}  ${s.url}`);
@@ -160,7 +156,7 @@ function dataUri(file) {
 	return `data:image/${type};base64,${fs.readFileSync(file).toString("base64")}`;
 }
 
-function build() {
+function build(dir, data) {
 	const out = structuredClone(data);
 	const proposal = out.proposal || {};
 	const images = [
@@ -198,6 +194,14 @@ function build() {
 	return 0;
 }
 
-const failed = skipShots ? 0 : await capture();
-const buildFailed = build();
-process.exit(failed || buildFailed ? 1 : 0);
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+	const args = process.argv.slice(2);
+	const dir = path.resolve(args.find((a) => !a.startsWith("--")) || ".");
+	const data = JSON.parse(fs.readFileSync(path.join(dir, "data.json"), "utf8"));
+	const shots = data.proposal?.shots || [];
+	const failed = args.includes("--no-shots")
+		? 0
+		: await captureShots(shots, path.join(dir, "shots"));
+	const buildFailed = build(dir, data);
+	process.exit(failed || buildFailed ? 1 : 0);
+}
