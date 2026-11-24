@@ -31,7 +31,7 @@ const escapeHtml = (text) =>
 		(c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
 	);
 
-export function previewHtml({ title, bodyHtml, branch, commits }) {
+export function previewHtml({ title, bodyHtml, branch, base, commits }) {
 	const t = escapeHtml(title);
 	return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${t}</title>
@@ -49,10 +49,40 @@ h1.t{font-size:32px;font-weight:400;margin:0 0 8px}
 .markdown-body img{border:1px solid #d1d9e0;border-radius:6px}
 </style></head><body><div class="wrap">
 <h1 class="t">${t}</h1>
-<div class="meta"><span class="state">Preview</span> wants to merge ${commits} commits into <code>main</code> from <code>${escapeHtml(branch)}</code></div>
+<div class="meta"><span class="state">Preview</span> wants to merge ${commits} commits into <code>${escapeHtml(base)}</code> from <code>${escapeHtml(branch)}</code></div>
 <div class="box"><div class="hd">Description</div><div class="markdown-body">${bodyHtml}</div></div>
 </div></body></html>
 `;
+}
+
+export function findBase(repoDir, remote = "origin") {
+	const current = git(repoDir, "branch", "--show-current");
+	const skip = new Set(["HEAD", ASSETS_BRANCH, current]);
+	const prefix = `${remote}/`;
+	const candidates = git(
+		repoDir,
+		"for-each-ref",
+		"--format=%(refname:short)",
+		`refs/remotes/${remote}`,
+	)
+		.split("\n")
+		.filter(
+			(ref) => ref.startsWith(prefix) && !skip.has(ref.slice(prefix.length)),
+		);
+	let best = { name: "main", ahead: Number.POSITIVE_INFINITY };
+	for (const ref of candidates) {
+		try {
+			git(repoDir, "merge-base", "--is-ancestor", ref, "HEAD");
+		} catch {
+			continue;
+		}
+		const ahead = Number(git(repoDir, "rev-list", "--count", `${ref}..HEAD`));
+		const name = ref.slice(prefix.length);
+		if (ahead < best.ahead || (ahead === best.ahead && name === "main")) {
+			best = { name, ahead };
+		}
+	}
+	return best.name;
 }
 
 function remoteHasAssets(repoDir, remote) {
@@ -133,21 +163,29 @@ function publish(dir) {
 	return 0;
 }
 
-function preview(dir, title) {
+function preview(dir, title, baseArg) {
 	if (!title) {
-		console.error('Usage: node pr.mjs preview <dir> --title "<title>"');
+		console.error(
+			'Usage: node pr.mjs preview <dir> --title "<title>" [--base <branch>]',
+		);
 		return 2;
 	}
 	const repoDir = git(process.cwd(), "rev-parse", "--show-toplevel");
 	const branch = git(repoDir, "branch", "--show-current");
-	const commits = Number(git(repoDir, "rev-list", "--count", "main..HEAD"));
+	const base = baseArg || findBase(repoDir);
+	const commits = Number(
+		git(repoDir, "rev-list", "--count", `origin/${base}..HEAD`),
+	);
 	const bodyHtml = execFileSync(
 		"gh",
 		["api", "markdown", "-f", "mode=gfm", "-F", "text=@body.md"],
 		{ cwd: dir, encoding: "utf8" },
 	);
 	const target = path.join(dir, "preview.html");
-	fs.writeFileSync(target, previewHtml({ title, bodyHtml, branch, commits }));
+	fs.writeFileSync(
+		target,
+		previewHtml({ title, bodyHtml, branch, base, commits }),
+	);
 	console.log(target);
 	return 0;
 }
@@ -155,13 +193,19 @@ function preview(dir, title) {
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
 	const [command, dirArg, ...rest] = process.argv.slice(2);
 	const dir = path.resolve(dirArg || ".");
-	const titleIndex = rest.indexOf("--title");
-	const title = titleIndex === -1 ? "" : rest[titleIndex + 1];
-	if (command === "shots") process.exit(await shots(dir));
-	else if (command === "preview") process.exit(preview(dir, title));
+	const option = (name) => {
+		const index = rest.indexOf(name);
+		return index === -1 ? "" : rest[index + 1];
+	};
+	if (command === "base") {
+		console.log(findBase(git(process.cwd(), "rev-parse", "--show-toplevel")));
+		process.exit(0);
+	} else if (command === "shots") process.exit(await shots(dir));
+	else if (command === "preview")
+		process.exit(preview(dir, option("--title"), option("--base")));
 	else if (command === "publish") process.exit(publish(dir));
 	else {
-		console.error("Usage: node pr.mjs <shots|preview|publish> <dir>");
+		console.error("Usage: node pr.mjs <base|shots|preview|publish> [dir]");
 		process.exit(2);
 	}
 }

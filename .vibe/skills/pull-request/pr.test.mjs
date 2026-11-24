@@ -4,7 +4,13 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { branchSlug, previewHtml, publishAssets, rawBase } from "./pr.mjs";
+import {
+	branchSlug,
+	findBase,
+	previewHtml,
+	publishAssets,
+	rawBase,
+} from "./pr.mjs";
 
 const git = (cwd, ...args) =>
 	execFileSync("git", args, { cwd, encoding: "utf8" }).trim();
@@ -107,13 +113,47 @@ test("preview looks like the PR page", () => {
 		title: "feat: add <thing>",
 		bodyHtml: "<h2>Context</h2>",
 		branch: "feat/x",
+		base: "feat/base",
 		commits: 3,
 	});
 	assert.match(html, /<title>feat: add &lt;thing&gt;<\/title>/);
 	assert.match(
 		html,
-		/wants to merge 3 commits into <code>main<\/code> from <code>feat\/x<\/code>/,
+		/wants to merge 3 commits into <code>feat\/base<\/code> from <code>feat\/x<\/code>/,
 	);
 	assert.match(html, /<div class="markdown-body"><h2>Context<\/h2><\/div>/);
 	assert.match(html, /github-markdown-light/);
+});
+
+function commitOn(repo, file) {
+	fs.writeFileSync(path.join(repo, file), `${file}\n`);
+	git(repo, "add", file);
+	git(repo, "commit", "-q", "-m", file);
+}
+
+test("finds main as the base of a branch made from main", () => {
+	const { repo } = fixture();
+	commitOn(repo, "x.txt");
+	git(repo, "push", "-q", "origin", "feat/x");
+	assert.equal(findBase(repo), "main");
+});
+
+test("finds the parent branch of a stacked branch", () => {
+	const { repo } = fixture();
+	commitOn(repo, "x.txt");
+	git(repo, "push", "-q", "origin", "feat/x");
+	git(repo, "switch", "-q", "-c", "feat/y");
+	commitOn(repo, "y.txt");
+	assert.equal(findBase(repo), "feat/x");
+});
+
+test("ignores pr-assets when looking for the base", () => {
+	const { repo, png } = fixture();
+	commitOn(repo, "x.txt");
+	publishAssets({
+		repoDir: repo,
+		branch: "feat/x",
+		files: [png("a.png", [1])],
+	});
+	assert.equal(findBase(repo), "main");
 });

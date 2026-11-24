@@ -5,7 +5,7 @@ description: Use when opening, writing or updating a pull request in this repo -
 
 # Pull request
 
-One pull request = one branch into `main`, with a description a reviewer can trust without running the code: what we did and why, then proof. The description is always in English. Follow the `anti-slop` skill for every line.
+One pull request = one branch into its base, with a description a reviewer can trust without running the code: what we did and why, then proof. The description is always in English. Follow the `anti-slop` skill for every line.
 
 `gh` cannot upload images. Screenshots go to the orphan branch `pr-assets` of this repo, one folder per PR branch, and the description links them with `raw.githubusercontent.com` URLs pinned to a commit, so they never change. The repo is public: so are the screenshots.
 
@@ -13,14 +13,14 @@ One pull request = one branch into `main`, with a description a reviewer can tru
 
 | File | Role |
 |---|---|
-| `pr.mjs` | `node .vibe/skills/pull-request/pr.mjs shots <dir>` captures the screens listed in `<dir>/pr.json` into `<dir>/shots/`. `node .vibe/skills/pull-request/pr.mjs preview <dir> --title "<title>"` renders `<dir>/body.md` with GitHub's own Markdown renderer into `<dir>/preview.html`, laid out like the PR page, with the local screenshots. `node .vibe/skills/pull-request/pr.mjs publish <dir>` pushes `<dir>/shots/*.png` to `pr-assets` without leaving the current branch, then replaces every `shots/<file>` in `<dir>/body.md` with its pinned URL. |
+| `pr.mjs` | `node .vibe/skills/pull-request/pr.mjs base` prints the base branch. `node .vibe/skills/pull-request/pr.mjs shots <dir>` captures the screens listed in `<dir>/pr.json` into `<dir>/shots/`. `node .vibe/skills/pull-request/pr.mjs preview <dir> --title "<title>" --base <base>` renders `<dir>/body.md` with GitHub's own Markdown renderer into `<dir>/preview.html`, laid out like the PR page, with the local screenshots. `node .vibe/skills/pull-request/pr.mjs publish <dir>` pushes `<dir>/shots/*.png` to `pr-assets` without leaving the current branch, then replaces every `shots/<file>` in `<dir>/body.md` with its pinned URL. |
 | `pr.test.mjs` | `node --test .vibe/skills/pull-request/pr.test.mjs` |
 
 The working folder is `docs/pull-requests/<branch-slug>/` (`<branch-slug>` = branch name with `/` replaced by `-`). `docs/` is git-ignored, so drafts stay local.
 
 ## Steps
 
-1. **Read the work.** `git log main..HEAD`, `git diff main...HEAD --stat`, then the files that matter. Read the design doc or plan in `docs/superpowers/` if one exists for this work. Look for a Linear identifier (`MIRA-12`) in the branch name and the commits.
+1. **Find the base, then read the work.** `node .vibe/skills/pull-request/pr.mjs base` prints the branch this one was made from: `main`, or the parent branch of a stacked PR (the closest pushed branch that HEAD contains). Use it as `<base>` everywhere below. Then `git log origin/<base>..HEAD`, `git diff origin/<base>...HEAD --stat`, then the files that matter. For a stacked PR, say in Context that it is stacked on `<base>` and must be merged after it. Read the design doc or plan in `docs/superpowers/` if one exists for this work. Look for a Linear identifier (`MIRA-12`) in the branch name and the commits.
 2. **Decide on screenshots.** If the diff touches `apps/web` or `packages/ui`, the change is visible: start the dev server (`pnpm dev:web`, note the port it prints) and list the screens the change affects in `pr.json`, each in desktop `1280x800` and mobile `390x844`. Otherwise take none: prove a server change with a command and its output under "How to test".
 3. **Capture.** `node .vibe/skills/pull-request/pr.mjs shots docs/pull-requests/<branch-slug>`. Open every PNG and check it shows the right state. When a state needs a click, use `eval` in the shot.
 4. **Write `body.md`** in the working folder, with these headings, in this order:
@@ -48,13 +48,13 @@ The working folder is `docs/pull-requests/<branch-slug>/` (`<branch-slug>` = bra
 
    The `Refs` line only when an identifier was found. The title follows the commit convention: `<type>: <what changes>`, English, 72 characters max.
 5. **Show the preview. Every time, no exception.**
-   1. `node .vibe/skills/pull-request/pr.mjs preview docs/pull-requests/<branch-slug> --title "<title>"`.
+   1. `node .vibe/skills/pull-request/pr.mjs preview docs/pull-requests/<branch-slug> --title "<title>" --base <base>`. The preview shows the base, so the person can catch a wrong one.
    2. Open it for the person: inside Orca, `orca tab create --url file://<absolute path>/preview.html`; anywhere else, give the absolute path to open in a browser.
    3. Say in one line what the PR contains, then wait for an explicit ok ("ok", "yes", "go", "vas-y"). Anything else is a no: apply the requested change, rebuild the preview, open it again, and wait again. Nothing is published, pushed or created on GitHub before that ok.
 6. **On ok, in this order:**
    1. `node .vibe/skills/pull-request/pr.mjs publish docs/pull-requests/<branch-slug>` (skip when there are no screenshots).
    2. `git push -u origin <branch>`.
-   3. `gh pr view <branch>`: if a PR exists, `gh pr edit <branch> --title "<title>" --body-file docs/pull-requests/<branch-slug>/body.md`; otherwise `gh pr create --base main --head <branch> --title "<title>" --body-file docs/pull-requests/<branch-slug>/body.md`.
+   3. `gh pr view <branch>`: if a PR exists, `gh pr edit <branch> --title "<title>" --body-file docs/pull-requests/<branch-slug>/body.md`; otherwise `gh pr create --base <base> --head <branch> --title "<title>" --body-file docs/pull-requests/<branch-slug>/body.md`.
    4. Reply with the PR URL.
 
 ## pr.json
