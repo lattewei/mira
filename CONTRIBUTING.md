@@ -86,6 +86,10 @@ pnpm dev
 
 The web application runs on `http://localhost:5173` and the API on `http://localhost:3000`.
 
+### Several worktrees at once
+
+In a new git worktree, run `pnpm setup:workspace` before `pnpm dev`. It copies your `.env` and `.env.local` files from the main checkout, then writes the worktree's own API and web ports to `apps/server/.env.development` and `apps/web/.env.development`, so several worktrees can run `pnpm dev` side by side. Running it again keeps the same ports.
+
 ### Forecasting
 
 ```bash
