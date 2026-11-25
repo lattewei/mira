@@ -90,6 +90,8 @@ The web application runs on `http://localhost:5173` and the API on `http://local
 
 In a new git worktree, run `pnpm setup:workspace` before `pnpm dev`. It copies your `.env` and `.env.local` files from the main checkout, then writes the worktree's own API and web ports to `apps/server/.env.development` and `apps/web/.env.development`, so several worktrees can run `pnpm dev` side by side. Running it again keeps the same ports.
 
+When you're done with a worktree, `pnpm archive:workspace` stops the servers it runs and removes it, `node_modules` and env files included. The branch stays. It refuses to run in the main checkout or with uncommitted changes.
+
 ### Forecasting
 
 ```bash
