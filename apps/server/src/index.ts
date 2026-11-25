@@ -9,6 +9,7 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 
+import { isClickHouseReachable } from "./clickhouse";
 import { ENV } from "./env.server";
 
 const mistral = createMistral({
@@ -25,6 +26,11 @@ const app = new Hono()
 		}),
 	)
 	.get("/health", (c) => c.json({ status: "ok" }))
+	.get("/health/clickhouse", async (c) =>
+		(await isClickHouseReachable())
+			? c.json({ status: "ok" }, 200)
+			: c.json({ status: "error" }, 503),
+	)
 	.post("/ai", async (c) => {
 		const body = await c.req.json();
 		const uiMessages = body.messages || [];

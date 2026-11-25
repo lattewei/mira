@@ -13,6 +13,7 @@
 	},
 	"dependencies": {
 		"@ai-sdk/mistral": "^4.0.89",
+		"@clickhouse/client-web": "1.25.0",
 		"@varlock/cloudflare-integration": "^1.6.4",
 		"ai": "catalog:",
 		"hono": "catalog:",
