@@ -1,7 +1,3 @@
--- First look at lift_status_raw (MIRA-14).
--- liftstateupdate is Paris local time without offset: parse it with 'Europe/Paris'.
-
--- Volume: snapshots, rows, raw size
 SELECT
 	uniqExact(fetched_at) AS snapshots,
 	count() AS rows,
@@ -10,7 +6,6 @@ SELECT
 	formatReadableSize(sum(length(payload))) AS raw_payload_size
 FROM lift_status_raw;
 
--- Volume per snapshot, with duplicate lifts
 SELECT
 	fetched_at,
 	count() AS rows,
@@ -20,7 +15,6 @@ FROM lift_status_raw
 GROUP BY fetched_at
 ORDER BY fetched_at;
 
--- Time between consecutive snapshots
 SELECT
 	fetched_at,
 	if(rank = 1, NULL, dateDiff('minute', previous, fetched_at)) AS minutes_since_previous
@@ -33,7 +27,6 @@ FROM (
 )
 ORDER BY fetched_at;
 
--- Lifts and stations per mode, latest snapshot
 SELECT
 	JSONExtractString(payload, 'liftmode') AS mode,
 	count() AS lifts,
@@ -43,7 +36,6 @@ WHERE fetched_at = (SELECT max(fetched_at) FROM lift_status_raw)
 GROUP BY mode
 ORDER BY lifts DESC;
 
--- Lifts missing from at least one snapshot
 SELECT
 	JSONExtractString(payload, 'liftid') AS lift_id,
 	any(JSONExtractString(payload, 'liftmode')) AS mode,
@@ -55,7 +47,6 @@ GROUP BY lift_id
 HAVING seen_in_snapshots < (SELECT uniqExact(fetched_at) FROM lift_status_raw)
 ORDER BY first_seen, lift_id;
 
--- Status split per snapshot
 SELECT
 	fetched_at,
 	countIf(status = 'available') AS available,
@@ -69,7 +60,6 @@ FROM (
 GROUP BY fetched_at
 ORDER BY fetched_at;
 
--- Consistency between liftstatus, liftstate and liftreason
 SELECT
 	JSONExtractString(payload, 'liftstatus') AS status,
 	JSONExtractString(payload, 'liftstate') AS state,
@@ -79,7 +69,6 @@ FROM lift_status_raw
 GROUP BY status, state, reason
 ORDER BY rows DESC;
 
--- Age of the last state change at collection time
 SELECT
 	fetched_at,
 	countIf(updated_at IS NULL) AS missing_update,
@@ -90,6 +79,7 @@ SELECT
 FROM (
 	SELECT
 		fetched_at,
+		-- liftstateupdate is Paris local time, with no offset.
 		parseDateTimeBestEffortOrNull(
 			JSONExtractString(payload, 'liftstateupdate'),
 			'Europe/Paris'
@@ -99,7 +89,6 @@ FROM (
 GROUP BY fetched_at
 ORDER BY fetched_at;
 
--- Status transitions between consecutive snapshots of the same lift
 SELECT transition, count() AS lifts
 FROM (
 	SELECT
@@ -122,7 +111,6 @@ WHERE rank > 1
 GROUP BY transition
 ORDER BY lifts DESC;
 
--- Empty or null fields, latest snapshot
 SELECT
 	field.1 AS key,
 	countIf(field.2 IN ('null', '""')) AS empty,
@@ -134,7 +122,6 @@ WHERE fetched_at = (SELECT max(fetched_at) FROM lift_status_raw)
 GROUP BY key
 ORDER BY empty DESC;
 
--- Lifts most often unavailable across snapshots
 SELECT
 	JSONExtractString(payload, 'liftid') AS lift_id,
 	any(JSONExtractString(payload, 'zdcname')) AS station,
@@ -147,7 +134,6 @@ HAVING snapshots_down > 0
 ORDER BY snapshots_down DESC, lift_id
 LIMIT 20;
 
--- Dispotrains daily archive 2008-2012: coverage and statuses
 SELECT
 	min(day) AS first_day,
 	max(day) AS last_day,
@@ -162,7 +148,6 @@ FROM scratch.dispotrains_daily_2008
 GROUP BY status
 ORDER BY rows DESC;
 
--- Dispotrains events 2013-today: volume per year and repeated readings
 SELECT
 	toYear(lastupdate) AS year,
 	count() AS events,
@@ -172,7 +157,6 @@ FROM scratch.dispotrains_statuses
 GROUP BY year
 ORDER BY year;
 
--- Raw states, before normalisation
 SELECT
 	replaceRegexpOne(state, ' jusqu''au \\d{2}/\\d{2}/\\d{4}$', ' jusqu''au <date>') AS state_family,
 	count() AS events
@@ -180,7 +164,6 @@ FROM scratch.dispotrains_statuses
 GROUP BY state_family
 ORDER BY events DESC;
 
--- Share of events that repeat the previous state of the same lift
 SELECT
 	toYear(lastupdate) AS year,
 	countIf(state = previous_state) AS repeated,
@@ -197,7 +180,6 @@ FROM (
 GROUP BY year
 ORDER BY year;
 
--- Dispotrains lift IDs also present in the IDFM feed
 SELECT
 	countIf(in_idfm) AS matched,
 	count() AS dispotrains_ids,
